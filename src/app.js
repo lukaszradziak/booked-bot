@@ -86,7 +86,7 @@ if (!process.env.DAY) {
     await page.click(submitSelector);
 
     console.log('Waiting for success');
-    await page.waitForSelector('.reservation-save-message-pending', { timeout: 120*1000 });
+    await page.waitForSelector('.reservation-save-message-pending', { timeout: 60*1000 });
     console.log('success!');
   } else {
     console.log('no free places :(');
