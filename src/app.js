@@ -2,12 +2,17 @@ import puppeteer from 'puppeteer';
 import 'dotenv/config'
 import {getNextWeekDay} from "./utils.js";
 
+if (!process.env.DAY) {
+  throw new Error('DAY not exists in env');
+}
+
 (async () => {
-  const date = getNextWeekDay(2);
+  const date = getNextWeekDay(parseInt(process.env.DAY));
   console.log(`Staring... date: ${date}`)
   const browser = await puppeteer.launch({
-    headless: false,
+    //headless: false, // for debugging
     slowMo: 25,
+    args: ["--no-sandbox"]
   });
   const page = await browser.newPage();
   await page.setViewport({ width: 1080, height: 1024 });
@@ -64,21 +69,28 @@ import {getNextWeekDay} from "./utils.js";
   console.log('result', result);
   console.log('freePlaces', freePlaces);
 
-  // if (firstFreePlace) {
-  //   await page.goto('${process.env.URL}/Web/reservation?rid=' + firstFreePlace[0] + '&sid=3&rd=' + date);
-  //   console.log('reservation-url', '${process.env.URL}/Web/reservation?rid=' + firstFreePlace[0] + '&sid=3&rd=' + date);
-  //
-  //   const submitSelector = '.reservation-buttons > button';
-  //   await page.waitForSelector(submitSelector);
-  //
-  //   await page.type('input#reservation-title', process.env.REGISTER_PLATE);
-  //   await page.type('textarea#reservation-description', 'Całodniowa');
-  //   await page.click(submitSelector);
-  //
-  //   await page.waitForSelector('.reservation-save-message-pending', { timeout: 120*1000 });
-  // } else {
-  //   console.log('no free places :(');
-  // }
+  if (firstFreePlace) {
+    const reservationUrl = `${process.env.URL}/Web/reservation?rid=${firstFreePlace[0]}&sid=3&rd=${date}`;
+    await page.goto(reservationUrl);
+    console.log('reservation-url', reservationUrl);
+
+    console.log('Waiting for submit button');
+    const submitSelector = '.reservation-buttons > button';
+    await page.waitForSelector(submitSelector);
+
+    console.log('Typing plate and description');
+    await page.type('input#reservation-title', process.env.REGISTER_PLATE);
+    await page.type('textarea#reservation-description', 'Całodniowa');
+
+    console.log('Submitting');
+    await page.click(submitSelector);
+
+    console.log('Waiting for success');
+    await page.waitForSelector('.reservation-save-message-pending', { timeout: 120*1000 });
+    console.log('success!');
+  } else {
+    console.log('no free places :(');
+  }
 
   await browser.close();
 })();
