@@ -54,20 +54,21 @@ if (!process.env.DAY) {
         .querySelectorAll('div.reserved')
         .entries()
         .map(([id, element]) => {
-          return element.getAttribute('data-resourceid');
+          return [element.getAttribute('data-resourceid'), element.classList.contains('mine')];
         })
         .toArray(),
     };
   });
 
   const freePlaces = result['places'].filter(([placeId, name]) => {
-    return result['reserved'].indexOf(placeId) === -1;
+    return result['reserved'].map(([placeId, mine]) => placeId).indexOf(placeId) === -1;
   });
 
   const firstFreePlace = freePlaces[0];
 
-  console.log('result', result);
-  console.log('freePlaces', freePlaces);
+  console.log('Places', result.places);
+  console.log('Reserved', result.reserved);
+  console.log('Free places', freePlaces);
 
   if (firstFreePlace) {
     const reservationUrl = `${process.env.URL}/Web/reservation?rid=${firstFreePlace[0]}&sid=3&rd=${date}`;
@@ -87,9 +88,9 @@ if (!process.env.DAY) {
 
     console.log('Waiting for success');
     await page.waitForSelector('.reservation-save-message-pending', { timeout: 60*1000 });
-    console.log('success!');
+    console.log('Success!');
   } else {
-    console.log('no free places :(');
+    console.log('No free places :(');
   }
 
   await browser.close();
