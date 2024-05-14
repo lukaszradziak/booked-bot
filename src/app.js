@@ -60,38 +60,51 @@ if (!process.env.DAY) {
     };
   });
 
+  console.log('Places', result.places);
+  console.log('Reserved', result.reserved);
+
+  const minePlaces = result.reserved.filter(([placeId, mine]) => mine);
+  console.log('Mine places', minePlaces);
+
+  if (minePlaces.length) {
+    console.log('* Error: you already have a reservation');
+    await browser.close();
+    return;
+  }
+
   const freePlaces = result['places'].filter(([placeId, name]) => {
-    return result['reserved'].map(([placeId, mine]) => placeId).indexOf(placeId) === -1;
+    return result['reserved']
+      .map(([placeId, mine]) => placeId)
+      .indexOf(placeId) === -1;
   });
 
   const firstFreePlace = freePlaces[0];
-
-  console.log('Places', result.places);
-  console.log('Reserved', result.reserved);
   console.log('Free places', freePlaces);
 
-  if (firstFreePlace) {
-    const reservationUrl = `${process.env.URL}/Web/reservation?rid=${firstFreePlace[0]}&sid=3&rd=${date}`;
-    await page.goto(reservationUrl);
-    console.log('reservation-url', reservationUrl);
-
-    console.log('Waiting for submit button');
-    const submitSelector = '.reservation-buttons > button';
-    await page.waitForSelector(submitSelector);
-
-    console.log('Typing plate and description');
-    await page.type('input#reservation-title', process.env.REGISTER_PLATE);
-    await page.type('textarea#reservation-description', 'Całodniowa');
-
-    console.log('Submitting');
-    await page.click(submitSelector);
-
-    console.log('Waiting for success');
-    await page.waitForSelector('.reservation-save-message-pending', { timeout: 60*1000 });
-    console.log('Success!');
-  } else {
-    console.log('No free places :(');
+  if (!firstFreePlace) {
+    console.log('* Error: no free places :(');
+    await browser.close();
+    return;
   }
+
+  const reservationUrl = `${process.env.URL}/Web/reservation?rid=${firstFreePlace[0]}&sid=3&rd=${date}`;
+  await page.goto(reservationUrl);
+  console.log('reservation-url', reservationUrl);
+
+  console.log('Waiting for submit button');
+  const submitSelector = '.reservation-buttons > button';
+  await page.waitForSelector(submitSelector);
+
+  console.log('Typing plate and description');
+  await page.type('input#reservation-title', process.env.REGISTER_PLATE);
+  await page.type('textarea#reservation-description', 'Całodniowa');
+
+  console.log('Submitting');
+  await page.click(submitSelector);
+
+  console.log('Waiting for success');
+  await page.waitForSelector('.reservation-save-message-pending', { timeout: 60*1000 });
+  console.log('* Success!');
 
   await browser.close();
 })();
