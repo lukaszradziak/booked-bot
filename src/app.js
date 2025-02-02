@@ -6,7 +6,7 @@ if (!process.env.DAY) {
   throw new Error('DAY not exists in env');
 }
 
-(async () => { 
+(async () => {
   const date = getNextWeekDay(parseInt(process.env.DAY));
   console.log(`Staring... date: ${date}`);
 
@@ -14,7 +14,7 @@ if (!process.env.DAY) {
   console.log('Priority places', priorityPlaces);
 
   const browser = await puppeteer.launch({
-    //headless: false, // for debugging
+    // headless: false, // for debugging
     slowMo: 25,
     args: ["--no-sandbox"]
   });
@@ -22,7 +22,7 @@ if (!process.env.DAY) {
   await page.setViewport({ width: 1080, height: 1024 });
 
   console.log('Opening login page');
-  await page.goto(`${process.env.URL}/Web/?`);
+  await page.goto(`${process.env.URL}/Web/index.php?redirect=%2FWeb%2Fdashboard.php`);
 
   console.log('Waiting for login button');
   const searchResultSelector = 'button[name=login][type=submit]';
@@ -78,7 +78,7 @@ if (!process.env.DAY) {
   const sortedFreePlaces = freePlaces.sort((a, b) => {
     const indexA = priorityPlaces.indexOf(a[1]);
     const indexB = priorityPlaces.indexOf(b[1]);
-  
+
     if (indexA !== -1 && indexB !== -1) {
       return indexA - indexB;
     } else if (indexA !== -1) {
