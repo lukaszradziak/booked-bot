@@ -1,3 +1,5 @@
+// day 0 = poniedzialek
+// day 1 = wtorek
 export const getNextWeekDay = (day = 1) => {
   const date = new Date();
   date.setDate(date.getDate() + (7-date.getDay())%7+ day);

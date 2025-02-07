@@ -2,11 +2,16 @@ import puppeteer from 'puppeteer';
 import 'dotenv/config'
 import {getNextWeekDay} from "./utils.js";
 
-if (!process.env.DAY) {
+if (typeof process.env.DAY === 'undefined') {
   throw new Error('DAY not exists in env');
 }
 
 (async () => {
+  if (process.env.DELAY) {
+    console.log(`DELAY is set, so I wait ${parseInt(process.env.DELAY)}ms.`);
+    await new Promise((resolve) => setTimeout(resolve, parseInt(process.env.DELAY)));
+  }
+
   const date = getNextWeekDay(parseInt(process.env.DAY));
   console.log(`Staring... date: ${date}`);
 
@@ -34,7 +39,7 @@ if (!process.env.DAY) {
   await page.click(searchResultSelector);
 
   console.log('Submit, waiting for login');
-  await page.waitForSelector('.availabilityDashboard');
+  await page.waitForSelector('span.bi-person-circle');
 
   const reservationsUrl = `${process.env.URL}/Web/schedule.php?sd=${date}&sid=3`;
   console.log('Going to list reservations', reservationsUrl);
@@ -121,12 +126,16 @@ if (!process.env.DAY) {
   await page.type('input#reservation-title', process.env.REGISTER_PLATE);
   await page.type('textarea#reservation-description', 'Całodniowa');
 
-  console.log('Submitting');
-  await page.click(submitSelector);
+  if (!process.env.DRY_RUN) {
+    console.log('Submitting');
+    await page.click(submitSelector);
 
-  console.log('Waiting for success');
-  await page.waitForSelector('.reservation-save-message-pending', { timeout: 60*1000 });
-  console.log('* Success!');
+    console.log('Waiting for success');
+    await page.waitForSelector('.reservation-save-message-pending', {timeout: 60 * 1000});
+    console.log('* Success!');
+  } else {
+    console.log('DRY RUN, exited!');
+  }
 
   await browser.close();
 })();
