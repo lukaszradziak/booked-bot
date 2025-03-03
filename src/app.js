@@ -48,7 +48,7 @@ if (typeof process.env.DAY === 'undefined') {
   log('Submit, waiting for login');
   await page.waitForSelector('span.bi-person-circle');
 
-  for (let i = 1; i <= 5; i++) {
+  for (let i = 1; i <= 8; i++) {
     console.log(`=== step ${i} ===`);
 
     const reservationsUrl = `${process.env.URL}/Web/schedule.php?sd=${date}&sid=3`;
