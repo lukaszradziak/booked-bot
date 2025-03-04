@@ -48,7 +48,7 @@ if (typeof process.env.DAY === 'undefined') {
   log('Submit, waiting for login');
   await page.waitForSelector('span.bi-person-circle');
 
-  for (let i = 1; i <= 8; i++) {
+  for (let i = 1; i <= 12; i++) {
     console.log(`=== step ${i} ===`);
 
     const reservationsUrl = `${process.env.URL}/Web/schedule.php?sd=${date}&sid=3`;
@@ -167,7 +167,7 @@ if (typeof process.env.DAY === 'undefined') {
       log('DRY RUN, exited!');
     }
 
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    await new Promise((resolve) => setTimeout(resolve, 500));
 
     console.log('=== end step ===');
   }
