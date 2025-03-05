@@ -27,7 +27,7 @@ if (typeof process.env.DAY === 'undefined') {
 
   const browser = await puppeteer.launch({
     // headless: false, // for debugging
-    slowMo: 25,
+    // slowMo: 25,
     args: ["--no-sandbox"]
   });
   const page = await browser.newPage();
@@ -48,7 +48,7 @@ if (typeof process.env.DAY === 'undefined') {
   log('Submit, waiting for login');
   await page.waitForSelector('span.bi-person-circle');
 
-  for (let i = 1; i <= 12; i++) {
+  for (let i = 1; i <= 50; i++) {
     console.log(`=== step ${i} ===`);
 
     const reservationsUrl = `${process.env.URL}/Web/schedule.php?sd=${date}&sid=3`;
@@ -143,6 +143,11 @@ if (typeof process.env.DAY === 'undefined') {
     });
 
     log('Errors', errors);
+
+    if (errors && errors.length) {
+      console.log('Errors detected, skipping...');
+      continue;
+    }
 
     log('Typing plate and description');
     await page.type('input#reservation-title', process.env.REGISTER_PLATE);
