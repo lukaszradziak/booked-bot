@@ -48,7 +48,7 @@ if (typeof process.env.DAY === 'undefined') {
   log('Submit, waiting for login');
   await page.waitForSelector('span.bi-person-circle');
 
-  for (let i = 1; i <= 50; i++) {
+  for (let i = 1; i <= 30; i++) {
     console.log(`=== step ${i} ===`);
 
     const reservationsUrl = `${process.env.URL}/Web/schedule.php?sd=${date}&sid=3`;
@@ -73,6 +73,14 @@ if (typeof process.env.DAY === 'undefined') {
           .querySelectorAll('div.reserved')
           .entries()
           .map(([id, element]) => {
+            return [element.getAttribute('data-resourceid'), element.classList.contains('reserved')];
+          })
+          .toArray(),
+        own: document
+          .querySelector('table.reservations')
+          .querySelectorAll('div.reserved')
+          .entries()
+          .map(([id, element]) => {
             return [element.getAttribute('data-resourceid'), element.classList.contains('mine')];
           })
           .toArray(),
@@ -81,6 +89,16 @@ if (typeof process.env.DAY === 'undefined') {
 
     log('Places', result.places);
     log('Reserved', result.reserved);
+    log('Own', result.own);
+
+    const minePlaces = result.own.filter(([placeId, mine]) => mine);
+    log('Mine places', minePlaces);
+
+    if (minePlaces.length) {
+      log('* Error: you already have a reservation');
+      await browser.close();
+      return;
+    }
 
     const freePlaces = result['places'].filter(([placeId, name]) => {
       return result['reserved']
@@ -111,15 +129,6 @@ if (typeof process.env.DAY === 'undefined') {
 
     if (!firstFreePlace) {
       log('* Error: no free places :(');
-      await browser.close();
-      return;
-    }
-
-    const minePlaces = result.reserved.filter(([placeId, mine]) => mine);
-    log('Mine places', minePlaces);
-
-    if (minePlaces.length) {
-      log('* Error: you already have a reservation');
       await browser.close();
       return;
     }
