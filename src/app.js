@@ -55,6 +55,11 @@ if (typeof process.env.DAY === 'undefined') {
     log('Going to list reservations', reservationsUrl);
     await page.goto(reservationsUrl);
 
+    await page.waitForResponse(response =>
+      response.url().includes('/Web/schedule.php?dr=reservations') &&
+      response.request().method() === 'POST'
+    );
+
     log('Waiting for reservations');
     await page.waitForSelector('table.reservations');
 
